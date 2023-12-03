@@ -1,6 +1,6 @@
 import re
 
-f = open("test2.txt", 'r')
+f = open("input.txt", 'r')
 lineList = f.read().splitlines()
 DIGIT_NAMES = {
     'one' : '1',
@@ -14,13 +14,23 @@ DIGIT_NAMES = {
     'nine' : '9'
 }
 
-def digitise(line):
-    
-    for key, val in DIGIT_NAMES.items():
-        line = line.replace(key, val)
-    return line
-
-digitsList = [digitise(l) for l in lineList]
-print(digitsList)
 pattern = '\d'
-print(sum([int(re.search(pattern, l).group() + re.search(pattern, l[::-1]).group()) for l in digitsList]))
+for digName in DIGIT_NAMES.keys():
+    pattern+='|' + re.escape(digName) 
+
+#print (pattern)
+
+
+def digitise(digit):
+    
+    if digit in DIGIT_NAMES.keys():
+        return DIGIT_NAMES.get(digit)
+    else:
+        return digit
+
+
+digLines = [re.findall(pattern, l) for l in lineList]
+
+print(digLines)
+
+print(sum([int(digitise(l[0]) + digitise(l[-1])) for l in digLines]))

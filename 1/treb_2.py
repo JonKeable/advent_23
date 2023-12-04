@@ -14,12 +14,19 @@ DIGIT_NAMES = {
     'nine' : '9'
 }
 
-pattern = '\d'
+R_DIGIT_NAMES = {k[::-1] : v for  (k,v) in DIGIT_NAMES.items()}
+print(R_DIGIT_NAMES)
+
+fPattern = rPattern = '\d'
+
 for digName in DIGIT_NAMES.keys():
-    pattern+='|' + re.escape(digName) 
+    fPattern+='|' + re.escape(digName)
 
-#print (pattern)
+for digName in R_DIGIT_NAMES.keys():
+    rPattern+='|' + re.escape(digName)  
 
+print (fPattern)
+print (rPattern)
 
 def digitise(digit):
     
@@ -29,8 +36,5 @@ def digitise(digit):
         return digit
 
 
-digLines = [re.findall(pattern, l) for l in lineList]
 
-print(digLines)
-
-print(sum([int(digitise(l[0]) + digitise(l[-1])) for l in digLines]))
+print(sum([int(digitise(re.search(fPattern, l).group()) + digitise(re.search(rPattern, l[::-1]).group()[::-1])) for l in lineList]))

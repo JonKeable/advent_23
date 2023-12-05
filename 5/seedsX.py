@@ -4,7 +4,7 @@ import re
 f = open("input.txt", 'r')
 lineList = f.read().splitlines()
 
-print(lineList)
+#print(lineList)
 
 mappingsDict ={}
 mapOrder = []
@@ -15,7 +15,7 @@ for line in lineList[1:]:
 
     if 'map' in line:
         mapping = tuple(re.split('\-|\s', line)[0::2])
-        print(mapping)
+        #print(mapping)
         source, dest = mapping[0], mapping[1]
         mappingName = source + '-' + dest
         mappingsDict.update({mappingName : {}})
@@ -24,9 +24,9 @@ for line in lineList[1:]:
         line = line.split()
         sourceStart = int(line[1])
         destStart = int(line[0])
+        offset = destStart - sourceStart
         mapRange = int(line[2])
-        for i in range(mapRange):
-            mappingsDict[mappingName].update({sourceStart+i:destStart+i})
+        mappingsDict[mappingName].update({(sourceStart,sourceStart+mapRange):offset})
 
 #not very encapsulated...
 mapOrder.append(dest)
@@ -36,16 +36,19 @@ mapOrder.append(dest)
 
         
 #print(mappingsDict)
-print(mappingsDict['seed-soil'])
+#print(mappingsDict['seed-soil'])
 
 def getMapping(k, source, dest):
     mapName = source + '-' + dest
     map = mappingsDict[mapName]
-    return ( map[k] if k in map else k)
+    for mapRange, offset in map.items():
+        if k in range(mapRange[0], mapRange[1]):
+            return k + offset
+    return k
 
 
 locs = set()
-print(mapOrder)
+#print(mapOrder)
 
 
 for seed in seeds:
@@ -56,8 +59,10 @@ for seed in seeds:
         end = id
         res = getMapping(res, start, end)
         start = end
-    print(res)
+    locs.add(res)
 
+print(locs)
+print(min(locs))
 
 
 

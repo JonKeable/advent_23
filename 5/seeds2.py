@@ -46,7 +46,7 @@ class RangeMap:
                 return ([(outputStart, inputEnd+self.offset)], None)
             #overlap
             else:
-                return([(outputStart, self.sourceEnd)],(self.sourceEnd, inputEnd))
+                return([(outputStart, self.destEnd)],(self.sourceEnd, inputEnd))
         #el start below range
         #if end within range
         elif inputEnd >= self.sourceStart :
@@ -117,7 +117,7 @@ def getMapping(kRange, source, dest):
         destRanges.append(remainRange)
     #return the original range if no matching maps, 
     # otherwise a list of all destination ranges plus unmapped ranges
-    #print(f'{kRange} {source} --> {destRanges} {dest}')
+    print(f'{kRange} {source} --> {destRanges} {dest}')
     return destRanges
 
 

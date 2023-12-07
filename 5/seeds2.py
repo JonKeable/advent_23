@@ -148,7 +148,8 @@ for sr in seedRanges:
         for range in rangeList:
             #get a list of all the mapped ranges for this property map
             destRanges = getMapping(range, start, end)
-            nextList = destRanges
+            for dr in destRanges:
+                nextList.append(dr)
         start = end
         rangeList = nextList
     locs.append(rangeList)

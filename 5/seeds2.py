@@ -30,7 +30,7 @@ class RangeMap:
     def getDestRange(self, inputRange):
         '''
         given and input range, return a tuple containing 
-        -the range of destination values which are mapped from the given source input range
+        -the ranges of destination values which are mapped from the given source input range
         -the range of the given source input range which cannot be mapped
         '''
         inputStart = inputRange[0]
@@ -43,20 +43,20 @@ class RangeMap:
             outputStart = inputStart+ self.offset
             #fully inside
             if inputEnd <= self.sourceEnd :
-                return ((outputStart, inputEnd+self.offset), None)
+                return ([(outputStart, inputEnd+self.offset)], None)
             #overlap
             else:
-                return((outputStart, self.sourceEnd),(self.sourceEnd, inputEnd))
+                return([(outputStart, self.sourceEnd)],(self.sourceEnd, inputEnd))
         #el start below range
         #if end within range
         elif inputEnd >= self.sourceStart :
             outputStart = self.destStart
             #underlap
             if inputEnd <= self.sourceEnd :
-                return ((outputStart, inputEnd+self.offset), (inputStart, self.sourceStart))
-            #overlap and underlap
+                return ([(outputStart, inputEnd+self.offset)], (inputStart, self.sourceStart))
+            #overlap and underlap, can map underlap naturally (k -> k)
             else:
-                return ([(inputStart, self.sourceStart-1), (outputStart, self.destEnd)], (self.sourceEnd, inputEnd))
+                return ([(inputStart, self.sourceStart),(self.destStart, self.destEnd)], (self.sourceEnd, inputEnd))
 
 
 
@@ -103,12 +103,16 @@ def getMapping(kRange, source, dest):
     remainRange = kRange
     for rm in  mapList:
         mapping = rm.getDestRange(remainRange)
-        mappedRange = mapping[0]
+        mappedRanges = mapping[0]
         remainRange = mapping[1]
-        if mappedRange != None:
-            destRanges.append(mappedRange)
+        if mappedRanges != None:
+            for mr in mappedRanges:
+                destRanges.append(mr)
         if remainRange == None:
             break
+
+                
+
     if remainRange != None:
         destRanges.append(remainRange)
     #return the original range if no matching maps, 
@@ -144,7 +148,7 @@ for sr in seedRanges:
         for range in rangeList:
             #get a list of all the mapped ranges for this property map
             destRanges = getMapping(range, start, end)
-            nextList =destRanges
+            nextList = destRanges
         start = end
         rangeList = nextList
     locs.append(rangeList)

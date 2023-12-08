@@ -4,7 +4,8 @@ import re
 @total_ordering
 class CamelCard:
     # T = 10
-    FACE_ORDER = ['A', 'K', 'Q', 'J', 'T']
+    # Js are now Jokers not Face Cards
+    FACE_ORDER = ['A', 'K', 'Q', 'T']
 
     def __init__(self, card_char) -> None:
         self.card_char = card_char
@@ -13,20 +14,16 @@ class CamelCard:
 
     @classmethod
     def is_valid_card(cls, card_char) -> bool:
-        return (card_char in cls.FACE_ORDER) or bool(re.match('^\d$', card_char))
+        return (card_char in cls.FACE_ORDER) or bool(re.match('^\d$', card_char)) or card_char == 'J'
 
 
     def is_face(self) -> bool:
-        try:
-            int(self.card_char)
-            return False
-        except:
-            return True
+       return self.card_char in self.FACE_ORDER
         
     def __lt__(self, other):
+        #We consider Jokers NOT to be face cards
         if  self.is_face():
             if other.is_face():
-                #implement face card rank
                 return (self.FACE_ORDER.index(self.card_char) - self.FACE_ORDER.index(other.card_char)) > 0 
             else:
                 return False
@@ -34,7 +31,15 @@ class CamelCard:
             if other.is_face():
                 return True
             else:
-                return self.card_char < other.card_char
+                #if we're a joker, less than all other cards except joker
+                if self.card_char == 'J':
+                    return other.card_char != 'J'
+                #if the other is a joker and we're not, we must be higher
+                elif other.card_char == 'J':
+                    return False
+                #otherwise just use the natural integer order
+                else:
+                    return self.card_char < other.card_char
             
     def __eq__(self, other) -> bool:
         return self.card_char == other.card_char
@@ -55,29 +60,48 @@ class CamelHand:
         for card in self.hand_str:
             assert CamelCard.is_valid_card(card)
 
-        card_set = set(self.hand_str)
+        if 'J' in self.hand_str:
+            card_set = set(hand_str) - {'J'}
+            if len(card_set) == 0:
+                self.hand_type = '5k'
+                return
+            max_count = 0
+            for card in card_set :
+                count = hand_str.count(card)
+                if count > max_count:
+                    max_count = count
+                    max_card = card
+            self.hand_type = self.get_hand_type(self.hand_str.replace('J', max_card))
+            
+
+        else:
+            self.hand_type = self.get_hand_type(self.hand_str)
+
+    
+    @classmethod
+    def get_hand_type(cls, hand_str):
+        card_set = set(hand_str)
         counts = []
         for card in card_set:
-            counts.append(self.hand_str.count(card))
+            counts.append(hand_str.count(card))
         #print(counts)
 
         if len(card_set) == 1:
-            self.hand_type = '5k'
+            return '5k'
         elif len(card_set) == 2:
             if 4 in counts:
-                self.hand_type ='4k'
+                return '4k'
             else:
-                self.hand_type='fh'
+                return 'fh'
         elif len(card_set) == 3:
             if 3 in counts:
-                self.hand_type='3k'
+                return '3k'
             else:
-                self.hand_type='2p'
+                return '2p'
         elif len(card_set) == 4:
-            self.hand_type = '1p'
+            return '1p'
         else: #5 different cards
-            self.hand_type = 'hc'
-    
+            return 'hc'
 
     def __lt__(self, other):
         if self.hand_type != other.hand_type:
@@ -105,11 +129,9 @@ def test_card_ordering(test_cards):
 
 f = open("input.txt", 'r')
 line_list = [tuple(line.split()) for line in f.read().splitlines()]
-
 #print (line_list)
 
-#card_test_dict = test_card_ordering(['A', 'T', '9', '3'])
-
+#card_test_dict = test_card_ordering(['A', 'T', '9', '3', 'J'])
 #print(card_test_dict)
 
 # CamelCard('JK')
